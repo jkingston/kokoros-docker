@@ -20,7 +20,7 @@ RUN wget https://huggingface.co/hexgrad/Kokoro-82M/resolve/main/kokoro-v0_19.onn
 FROM bitnami/minideb
 RUN apt-get update && apt-get install -y libssl-dev
 COPY --from=build /Kokoros/target/release/koko /Kokoros/target/release/koko
-COPY --from=build /Kokoros/target/release/build/espeak-rs-sys-d86ac823604b2480/out/share/ /Kokoros/target/release/build/espeak-rs-sys-d86ac823604b2480/out/share/
+COPY --from=build /Kokoros/target/release/build/ /Kokoros/target/release/build/
 COPY --from=build /Kokoros/data /Kokoros/data
 COPY --from=build /Kokoros/checkpoints /Kokoros/checkpoints
 WORKDIR /Kokoros
