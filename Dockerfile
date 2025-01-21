@@ -13,15 +13,15 @@ RUN apt-get update && apt-get install -y libssl-dev pkg-config libclang-dev cmak
 RUN rustup component add rustfmt
 RUN cargo build --release
 
-# Run koko to generate the onnx model at docker build time
-# This is to avoid the long wait time when running the container
-RUN ./target/release/koko 
+# Download the onnx model
+RUN apt-get install wget
+RUN wget https://huggingface.co/hexgrad/Kokoro-82M/resolve/main/kokoro-v0_19.onnx -O /Kokoros/checkpoints/kokoro-v0_19.onnx
 
 FROM bitnami/minideb
+RUN apt-get update && apt-get install -y libssl-dev
 COPY --from=build /Kokoros/target/release/koko /Kokoros/target/release/koko
-COPY --from=build /Kokoros/target/release/deps/ /Kokoros/target/release/deps/
+COPY --from=build /Kokoros/target/release/build/espeak-rs-sys-d86ac823604b2480/out/share/ /Kokoros/target/release/build/espeak-rs-sys-d86ac823604b2480/out/share/
 COPY --from=build /Kokoros/data /Kokoros/data
 COPY --from=build /Kokoros/checkpoints /Kokoros/checkpoints
-RUN apt-get update && apt-get install -y libssl-dev
 WORKDIR /Kokoros
 ENTRYPOINT [ "./target/release/koko" ]
