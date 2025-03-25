@@ -1,10 +1,9 @@
 FROM python:3.12-slim AS prepare
-RUN apt-get update && apt-get install -y git
-RUN git clone https://github.com/lucasjinreal/Kokoros.git
+RUN apt-get update && apt-get install -y git wget
+ADD Kokoros /Kokoros
 WORKDIR /Kokoros
-RUN pip install --upgrade pip
-RUN pip install -r scripts/requirements.txt
-RUN python scripts/fetch_voices.py
+RUN pip install --upgrade pip && pip install -r scripts/requirements.txt
+RUN chmod +x scripts/download_voices.sh && scripts/download_voices.sh
 
 FROM rust:1.84-slim AS build
 COPY --from=prepare /Kokoros /Kokoros
@@ -15,7 +14,7 @@ RUN cargo build --release
 
 # Download the onnx model
 RUN apt-get install wget
-RUN wget https://huggingface.co/hexgrad/Kokoro-82M/resolve/main/kokoro-v0_19.onnx -O /Kokoros/checkpoints/kokoro-v0_19.onnx
+RUN chmod +x scripts/download_models.sh && scripts/download_models.sh
 
 FROM bitnami/minideb
 RUN apt-get update && apt-get install -y libssl-dev
